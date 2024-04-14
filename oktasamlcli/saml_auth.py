@@ -18,13 +18,8 @@ class SamlAuth():
 
     def __init__(self, profile, okta_profile, verbose, logger):
         home_dir = os.path.expanduser('~')
-        shared_credentials_file = os.getenv("RADIUS_SHARED_CREDENTIALS_FILE")
-        if shared_credentials_file:
-            self.creds_dir = os.path.dirname(shared_credentials_file)
-            self.creds_file = shared_credentials_file
-        else:
-            self.creds_dir = home_dir + "/.saml"
-            self.creds_file = self.creds_dir + "/credentials"
+        self.creds_dir = home_dir + "/.saml"
+        self.creds_file = self.creds_dir + "/credentials"
         self.profile = profile
         self.verbose = verbose
         self.logger = logger
