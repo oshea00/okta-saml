@@ -26,7 +26,7 @@ This project is written for Python 3. Running it with Python 2 may work, but it 
 ```
 [default]
 base-url = <your_okta_org>.okta.com
-app-link = <app_link_from_okta> # Found in Okta's configuration for your AWS account.
+app-link = <app_link_from_okta> # Found in Okta's configuration for your SAML Application link.
 profile  = <saml_profile_to_store_credentials> # Sets your temporary credentials to a profile in `.saml/credentials`. Overridden by `--profile` command line flag
 
 ## The remaining parameters are optional.

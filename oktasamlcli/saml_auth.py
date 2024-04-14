@@ -62,7 +62,7 @@ class SamlAuth():
         parser.read(self.creds_file)
 
         if not os.path.exists(self.creds_dir):
-            self.logger.info("AWS credentials path does not exist. Not checking.")
+            self.logger.info("Saml credentials path does not exist. Not checking.")
             return False
 
         elif not os.path.isfile(self.creds_file):

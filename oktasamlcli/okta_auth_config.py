@@ -33,13 +33,10 @@ class OktaAuthConfig():
             okta_profile = input('Enter Okta profile name: ')
             if not okta_profile:
                 okta_profile = 'default'
-            profile = input('Enter AWS profile name: ')
+            profile = input('Enter credentials profile name: ')
             base_url = input('Enter Okta base url [your main organisation Okta url]: ')
             username = input('Enter Okta username: ')
-            app_link = input('Enter AWS app-link [optional]: ')
-            duration = input('Duration in seconds to request a session token for [Default=3600]: ')
-            if not duration:
-                duration = 3600
+            app_link = input('Enter OKTA SAML App app-link [optional]: ')
 
             value.add_section(okta_profile)
             value.set(okta_profile, 'base-url', base_url)
@@ -47,7 +44,6 @@ class OktaAuthConfig():
             value.set(okta_profile, 'username', username)
             if app_link:
                 value.set(okta_profile, 'app-link', app_link)
-            value.set(okta_profile, 'duration', duration)
 
             with open(config_path, 'w') as configfile:
                 value.write(configfile)
@@ -139,31 +135,6 @@ class OktaAuthConfig():
         elif self._value.has_option('default', 'scope'):
             scope = self._value.get('default', 'scope')
             return scope
-        return None
-
-    def duration_for(self, okta_profile):
-        """ Gets requested duration from config, ignore it on failure """
-        duration = None
-        if self._value.has_option(okta_profile, 'duration'):
-            duration = self._value.get(okta_profile, 'duration')
-            self.logger.debug(
-                "Requesting a duration of %s seconds" % duration
-            )
-        elif self._value.has_option('default', 'duration'):
-            duration = self._value.get('default', 'duration')
-            self.logger.debug(
-                "Requesting a duration of %s seconds from default" % duration
-            )
-
-        if duration is not None:
-            try:
-                return int(duration)
-            except ValueError:
-                self.logger.warn(
-                    "Duration could not be converted to a number,"
-                    " ignoring."
-                )
-
         return None
 
     def write_applink_to_profile(self, okta_profile, app_link):
