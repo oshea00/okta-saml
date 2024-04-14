@@ -4,6 +4,16 @@ Authenticates a user against Okta and then uses the resulting SAML assertion to 
 
 Parsing the HTML is still required to get the SAML assertion, after authentication is complete. However, since we only need to look for the SAML assertion in a single, predictable tag, `<input name="SAMLResponse"...`, the results are a lot more stable across any changes that Okta may make to their interface.
 
+when the command line is run with desired arguments (described below), upon successful login, the attributes in the SAML assertion will be used obtain a jwt token for the associated API scope.
+
+## Required OKTA Setup
+
+Create a SAML App integration with default settings. Add attributes to the SAML definition for ClientID and ClientSecret. These should contain the values from the client credential flow application you want to associate with your API's auth server. Create one or more scopes in your auth server as-needed.
+
+The embed link on your SAML app will be used for the app-link value in your ~/.okta-radius file.
+
+Associate your users/groups in the authserver access policies as-needed - one of those must include the intermediary client credential flow app that your saml attributes refer to.
+
 ## Disclaimer
 Okta is a registered trademark of Okta, Inc. and this tool has no affiliation with or sponsorship by Okta, Inc.
 
@@ -18,30 +28,20 @@ This project is written for Python 3. Running it with Python 2 may work, but it 
 ```
 [default]
 base-url = <your_okta_org>.okta.com
+app-link = <app_link_from_okta> # Found in Okta's configuration for your AWS account.
+scope = scope to use for API auth server
+profile  = <radius_profile_to_store_credentials> # Sets your temporary credentials to a profile in `.radius/credentials`. Overridden by `--profile` command line flag
 
 ## The remaining parameters are optional.
 ## You may be prompted for them, if they're not included here.
 username = <your_okta_username>
 password = <your_okta_password> # Only save your password if you know what you are doing!
-profile  = <radius_profile_to_store_credentials> # Sets your temporary credentials to a profile in `.radius/credentials`. Overridden by `--profile` command line flag
-app-link = <app_link_from_okta> # Found in Okta's configuration for your AWS account.
 duration = 3600 # duration in seconds to request a session token for. default: 3600
-scope = scope to use for API auth server
 ```
-
-## Supported Features
-
-- Tenant wide MFA support
-- Per-application MFA support (added in version 0.4.0)
-- Okta Verify [Play Store](https://play.google.com/store/apps/details?id=com.okta.android.auth) | [App Store](https://itunes.apple.com/us/app/okta-verify/id490179405)
-- Okta Verify Push Support
-- Google Authenticator [Play Store](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2) | [App Store](https://itunes.apple.com/us/app/google-authenticator/id388497605)
-- YubiKey (Requires library python-u2flib-host)  [HomePage](https://www.yubico.com/)
 
 ## Usage
 
 `okta-radiuscli --profile <radius_profile>`
-- Follow the prompts to enter MFA information (if required) and choose your radius api and role.
 - Subsequent executions will first check if the credentials are still valid and skip Okta authentication if so.
 - Multiple Okta profiles are supported, but if none are specified, then `default` will be used.
 - Selections for radius api and radius scope are saved to the `~/.okta-radius` file. 
