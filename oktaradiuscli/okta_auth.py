@@ -6,8 +6,6 @@ import re
 from codecs import decode
 import requests
 from bs4 import BeautifulSoup as bs
-from oktaradiuscli.okta_auth_mfa_base import OktaAuthMfaBase
-from oktaradiuscli.okta_auth_mfa_app import OktaAuthMfaApp
 
 class OktaAuth():
     """ Handles auth to Okta and returns SAML assertion """
@@ -50,17 +48,8 @@ class OktaAuth():
         resp_json = resp.json()
         self.cookies = resp.cookies
         if 'status' in resp_json:
-            if resp_json['status'] == 'MFA_REQUIRED':
-                factors_list = resp_json['_embedded']['factors']
-                state_token = resp_json['stateToken']
-                mfa_base = OktaAuthMfaBase(self.logger, state_token, self.factor, self.totp_token)
-                session_token = mfa_base.verify_mfa(factors_list)
-            elif resp_json['status'] == 'SUCCESS':
+            if resp_json['status'] == 'SUCCESS':
                 session_token = resp_json['sessionToken']
-            elif resp_json['status'] == 'MFA_ENROLL':
-                self.logger.warning("""MFA not enrolled. Cannot continue.
-Please enroll an MFA factor in the Okta Web UI first!""")
-                sys.exit(2)
             elif resp_json['status'] == 'LOCKED_OUT':
                 self.logger.error("""Account is locked. Cannot continue.
 Please contact you administrator in order to unlock the account!""")
@@ -84,35 +73,6 @@ Please contact you administrator in order to unlock the account!""")
         return resp['id']
 
 
-    def get_apps(self, session_id):
-        """ Gets apps for the user """
-        sid = "sid=%s" % session_id
-        headers = {'Cookie': sid}
-        resp = self.session.get(
-            self.https_base_url + '/api/v1/users/me/appLinks',
-            headers=headers).json()
-        aws_apps = []
-        for app in resp:
-            if app['appName'] == "amazon_aws":
-                aws_apps.append(app)
-        if not aws_apps:
-            self.logger.error("No AWS apps are available for your user. \
-                sys.exiting.")
-            sys.exit(1)
-
-        aws_apps = sorted(aws_apps, key=lambda app: app['sortOrder'])
-        app_choice = 0 if len(aws_apps) == 1 else None
-        if app_choice is None:
-            print("Available apps:")
-            for index, app in enumerate(aws_apps):
-                app_name = app['label']
-                print("%d: %s" % (index + 1, app_name))
-
-            app_choice = int(input('Please select AWS app: ')) - 1
-        self.logger.debug("Selected app: %s" % aws_apps[app_choice]['label'])
-        return aws_apps[app_choice]['label'], aws_apps[app_choice]['linkUrl']
-
-
     def get_simple_assertion(self, html):
         soup = bs(html.text, "html.parser")
         for input_tag in soup.find_all('input'):
@@ -121,34 +81,9 @@ Please contact you administrator in order to unlock the account!""")
 
         return None
 
-
-    def get_mfa_assertion(self, html):
-        soup = bs(html.text, "html.parser")
-        if hasattr(soup.title, 'string') and re.match(".* - Extra Verification$", soup.title.string):
-            state_token = decode(re.search(r"var stateToken = '(.*)';", html.text).group(1), "unicode-escape")
-        else:
-            self.logger.error(f"No Extra Verification. Title was {soup.title}")
-            return None
-
-        self.session.cookies['oktaStateToken'] = state_token
-
-        mfa_app = OktaAuthMfaApp(
-            self.logger,
-            self.session,
-            self.verify_ssl,
-            self.auth_url,
-            self.factor,
-            self.totp_token
-        )
-        api_response = mfa_app.stepup_auth(self.auth_url, state_token)
-        resp = self.session.get(self.app_link)
-
-        return self.get_saml_assertion(resp)
-
-
     def get_saml_assertion(self, html):
         """ Returns the SAML assertion from HTML """
-        assertion = self.get_simple_assertion(html) or self.get_mfa_assertion(html)
+        assertion = self.get_simple_assertion(html)
 
         if not assertion:
             self.logger.error("SAML assertion not valid: " + assertion)
@@ -160,11 +95,7 @@ Please contact you administrator in order to unlock the account!""")
         """ Main method to get SAML assertion from Okta """
         self.session_token = self.primary_auth()
         self.session_id = self.get_session(self.session_token)
-        if not self.app_link:
-            app_name, self.app_link = self.get_apps(self.session_id)
-            self.okta_auth_config.write_applink_to_profile(self.okta_profile, self.app_link)
-        else:
-            app_name = None
+        app_name = None
         self.session.cookies['sid'] = self.session_id
         resp = self.session.get(self.app_link)
         assertion = self.get_saml_assertion(resp)

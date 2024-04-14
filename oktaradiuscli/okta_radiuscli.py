@@ -63,11 +63,11 @@ def get_credentials(radius_auth, okta_profile, profile,
 
     _, assertion = okta.get_assertion()
 
+    scope = radius_auth.extract_scope_from(assertion)
     client_id = radius_auth.extract_clientid_from(assertion)
     client_secret = radius_auth.extract_clientsecret_from(assertion)
     app_link = okta_auth_config.app_link_for(okta_profile)
     token_url = f'{get_server_url(app_link)}/oauth2/default/v1/token'
-    scope = okta_auth_config.scope_for(okta_profile)
 
     jwt_token = get_jwt_token(
         client_id,
@@ -100,10 +100,18 @@ created. If omitted, credentials will output to console.\n")
 def main(okta_profile, profile, verbose, version,
          debug, force, 
          token, okta_username, okta_password, config, switch):
-    """ Authenticate to awscli using Okta """
+    """ Authenticate to radiuscli using Okta """
     if version:
         print(__version__)
         sys.exit(0)
+
+    # For testing
+    debug = True
+    verbose = True
+    force = False
+    profile = "default"
+    okta_profile = "radius.test"
+
     # Set up logging
     logger = logging.getLogger('okta-radiuscli')
     logger.setLevel(logging.DEBUG)

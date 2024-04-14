@@ -9,6 +9,9 @@ from collections import namedtuple
 from configparser import RawConfigParser
 from enum import Enum
 from subprocess import call
+import base64
+import json
+import time
 
 class RadiusAuth():
     """ Methods to support Radius api authentication using jwt """
@@ -44,6 +47,11 @@ class RadiusAuth():
         with open(self.creds_file, 'w+') as configfile:
             parser.write(configfile)
 
+    def check_jwt_expired(self,jwt_token):
+        jwt_json = base64.b64decode(jwt_token.split('.')[1] + '==')
+        exp = json.loads(jwt_json)['exp']
+        return exp < time.time()
+
     def check_jwt_token(self):
         """ Verifies that jwt is valid """
         # Don't check for creds if profile is blank
@@ -63,6 +71,17 @@ class RadiusAuth():
 
         elif not parser.has_section(self.profile):
             self.logger.info("No existing credentials found. Requesting new credentials.")
+            return False
+
+        # get jwt value from self.creds_file
+        if parser.has_option(self.profile, 'jwt_session_token'):
+            jwt_token = parser.get(self.profile, 'jwt_session_token')
+
+            # parse token and check if it's expired
+            # if expired, return False
+            if self.check_jwt_expired(jwt_token):
+                return False
+        else:
             return False
 
         self.logger.info("Radius credentials are valid. Nothing to do.")
@@ -90,6 +109,12 @@ class RadiusAuth():
         
         if self.profile != 'default':
             RadiusAuth.set_default_profile(self, config)
+
+    def extract_scope_from(self, assertion):
+        assertion_xml = base64.b64decode(assertion)
+        root = ET.fromstring(assertion_xml)
+        audience = root.find('.//{urn:oasis:names:tc:SAML:2.0:assertion}Audience').text
+        return audience
 
     def extract_clientid_from(self, assertion):
         attribute = 'ClientID'
