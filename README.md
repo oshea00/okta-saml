@@ -52,7 +52,7 @@ Optional flags:
 - `--profile` or `-p` Sets your temporary credentials to a profile in `.saml/credentials`. If omitted and not configured in `~/.okta-saml`, credentials will output to console.
 - `--username` or `-U` Okta username.
 - `--password` or `-P` Okta password.
-- `--force` or `-f` Ignores result of STS credentials validation and gets new credentials from OKTA. Used in conjunction with `--profile`.
+- `--force` or `-f` Ignores result of JWT expiration check and gets new credentials from OKTA. Used in conjunction with `--profile`.
 - `--verbose` or `-v` More verbose output.
 - `--debug` or `-d` Very verbose output. Useful for debugging.
 - `--cache` or `-c` Cache the acquired credentials to ~/.okta-credentials.cache (only if --profile is unspecified)
