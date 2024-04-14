@@ -1,4 +1,4 @@
-""" Radius authentication """
+""" Saml authentication """
 # pylint: disable=C0325
 # Copyright 2024 Michael OShea
 import os
@@ -13,8 +13,8 @@ import base64
 import json
 import time
 
-class RadiusAuth():
-    """ Methods to support Radius api authentication using jwt """
+class SamlAuth():
+    """ Methods to support Saml api authentication using jwt """
 
     def __init__(self, profile, okta_profile, verbose, logger):
         home_dir = os.path.expanduser('~')
@@ -23,20 +23,20 @@ class RadiusAuth():
             self.creds_dir = os.path.dirname(shared_credentials_file)
             self.creds_file = shared_credentials_file
         else:
-            self.creds_dir = home_dir + "/.radius"
+            self.creds_dir = home_dir + "/.saml"
             self.creds_file = self.creds_dir + "/credentials"
         self.profile = profile
         self.verbose = verbose
         self.logger = logger
         self.role = ""
         
-        okta_config = home_dir + '/.okta-radius'
+        okta_config = home_dir + '/.okta-saml'
         parser = RawConfigParser()
         parser.read(okta_config)
 
         if parser.has_option(okta_profile, 'profile') and not profile:
             self.profile = parser.get(okta_profile, 'profile')
-            self.logger.debug("Setting radius profile to %s" % self.profile)
+            self.logger.debug("Setting saml profile to %s" % self.profile)
 
     def set_default_profile(self, parser: RawConfigParser):
         if not parser.has_section('default'):
@@ -66,7 +66,7 @@ class RadiusAuth():
             return False
 
         elif not os.path.isfile(self.creds_file):
-            self.logger.info("Radius credentials file does not exist. Not checking.")
+            self.logger.info("Saml credentials file does not exist. Not checking.")
             return False
 
         elif not parser.has_section(self.profile):
@@ -84,8 +84,8 @@ class RadiusAuth():
         else:
             return False
 
-        self.logger.info("Radius credentials are valid. Nothing to do.")
-        RadiusAuth.set_default_profile(self, parser)
+        self.logger.info("Saml credentials are valid. Nothing to do.")
+        SamlAuth.set_default_profile(self, parser)
 
         return True
 
@@ -108,7 +108,7 @@ class RadiusAuth():
         self.logger.info("Temporary credentials written to profile: %s" % self.profile)
         
         if self.profile != 'default':
-            RadiusAuth.set_default_profile(self, config)
+            SamlAuth.set_default_profile(self, config)
 
     def extract_scope_from(self, assertion):
         assertion_xml = base64.b64decode(assertion)

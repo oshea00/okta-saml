@@ -3,11 +3,11 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "oktaradiuscli"
+name = "okta-saml"
 authors = [
     {name="Mike Oshea",email="moshea@paraport.com"}
 ]
-description = "Utility to obtain radius api jwt from OKTA"
+description = "Utility to obtain saml api jwt from OKTA"
 readme = "README.md"
 requires-python = ">=3.8"
 version = "0.0.1"
@@ -17,7 +17,6 @@ dependencies = [
   "beautifulsoup4==4.11.1",
   "ConfigParser==3.5.0",
   "validators==0.11.2",
-  "okta"
 ]
 [project.scripts]
-okta-radiuscli = "oktaradiuscli.okta_radiuscli:main"
+okta-saml = "oktasamlcli.okta_samlcli:main"

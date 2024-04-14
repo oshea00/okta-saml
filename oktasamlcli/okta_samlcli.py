@@ -1,14 +1,14 @@
-""" Wrapper script for radius api which handles Okta auth """
+""" Wrapper script for saml api which handles Okta auth """
 # pylint: disable=C0325,R0913,R0914
 # Copyright 2024 Michael OShea
 from email.policy import default
 import sys
 import logging
 import click
-from oktaradiuscli.version import __version__
-from oktaradiuscli.okta_auth import OktaAuth
-from oktaradiuscli.okta_auth_config import OktaAuthConfig
-from oktaradiuscli.radius_auth import RadiusAuth
+from oktasamlcli.version import __version__
+from oktasamlcli.okta_auth import OktaAuth
+from oktasamlcli.okta_auth_config import OktaAuthConfig
+from oktasamlcli.saml_auth import SamlAuth
 import requests
 from requests.auth import HTTPBasicAuth
 from urllib.parse import urlparse
@@ -52,7 +52,7 @@ def get_jwt_token(client_id, client_secret, token_url, scope):
 
     return jwt_decoded
 
-def get_credentials(radius_auth, okta_profile, profile,
+def get_credentials(saml_auth, okta_profile, profile,
                     verbose, logger, totp_token,  
                     okta_username=None, okta_password=None):
     """ Gets credentials from Okta """
@@ -63,9 +63,9 @@ def get_credentials(radius_auth, okta_profile, profile,
 
     _, assertion = okta.get_assertion()
 
-    scope = radius_auth.extract_scope_from(assertion)
-    client_id = radius_auth.extract_clientid_from(assertion)
-    client_secret = radius_auth.extract_clientsecret_from(assertion)
+    scope = saml_auth.extract_scope_from(assertion)
+    client_id = saml_auth.extract_clientid_from(assertion)
+    client_secret = saml_auth.extract_clientsecret_from(assertion)
     app_link = okta_auth_config.app_link_for(okta_profile)
     token_url = f'{get_server_url(app_link)}/oauth2/default/v1/token'
 
@@ -78,7 +78,7 @@ def get_credentials(radius_auth, okta_profile, profile,
 
     session_token = jwt_token
 
-    radius_auth.write_jwt_token(session_token)
+    saml_auth.write_jwt_token(session_token)
 
 
 # pylint: disable=R0913
@@ -87,10 +87,10 @@ def get_credentials(radius_auth, okta_profile, profile,
 @click.option('-V', '--version', is_flag=True,help='Outputs version number and sys.exits')
 @click.option('-d', '--debug', is_flag=True, help='Enables debug mode')
 @click.option('-f', '--force', is_flag=True, help='Forces new credentials.')
-@click.option('-o', '--okta-profile', help="Name of the profile to use in .okta-radius. \
+@click.option('-o', '--okta-profile', help="Name of the profile to use in .okta-saml. \
 If none is provided, then the default profile will be used.\n")
 @click.option('-p', '--profile', help="Name of the profile to store temporary \
-credentials in ~/.radius/credentials. If profile doesn't exist, it will be \
+credentials in ~/.saml/credentials. If profile doesn't exist, it will be \
 created. If omitted, credentials will output to console.\n")
 @click.option('-t', '--token', help='TOTP token from your authenticator app')
 @click.option('-U', '--username', 'okta_username', help="Okta username")
@@ -100,13 +100,13 @@ created. If omitted, credentials will output to console.\n")
 def main(okta_profile, profile, verbose, version,
          debug, force, 
          token, okta_username, okta_password, config, switch):
-    """ Authenticate to radiuscli using Okta """
+    """ Authenticate to saml using Okta """
     if version:
         print(__version__)
         sys.exit(0)
 
     # Set up logging
-    logger = logging.getLogger('okta-radiuscli')
+    logger = logging.getLogger('okta-saml')
     logger.setLevel(logging.DEBUG)
     handler = logging.StreamHandler()
     handler.setLevel(logging.WARN)
@@ -127,13 +127,13 @@ def main(okta_profile, profile, verbose, version,
     if switch:
         okta_profile = okta_switch(logger)
 
-    radius_auth = RadiusAuth(profile, okta_profile, verbose, logger)
-    if force or not radius_auth.check_jwt_token():
+    saml_auth = SamlAuth(profile, okta_profile, verbose, logger)
+    if force or not saml_auth.check_jwt_token():
         if force and profile:
             logger.info("Force option selected, \
                 getting new credentials anyway.")
         get_credentials(
-            radius_auth, okta_profile, profile, verbose, logger, token, okta_username, okta_password
+            saml_auth, okta_profile, profile, verbose, logger, token, okta_username, okta_password
         )
 
 if __name__ == "__main__":

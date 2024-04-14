@@ -12,14 +12,14 @@ class OktaAuthConfig():
     """ Config helper class """
     def __init__(self, logger):
         self.logger = logger
-        self.config_path = os.path.expanduser('~') + '/.okta-radius'
+        self.config_path = os.path.expanduser('~') + '/.okta-saml'
         self._value = RawConfigParser()
         self._value.read(self.config_path)
     
     @staticmethod
     def configure(logger):
         value = RawConfigParser()
-        config_path = os.path.expanduser('~') + '/.okta-radius'
+        config_path = os.path.expanduser('~') + '/.okta-saml'
         if os.path.exists(config_path):
             value.read(config_path)
             print(f"You have preconfigured Okta profiles: {value.sections()}")
@@ -53,7 +53,7 @@ class OktaAuthConfig():
                 value.write(configfile)
 
             print(f"Configuration {config_path} successfully updated. Now you can authenticate to Okta")
-            print(f"Execute 'okta-radiuscli -o {okta_profile} -p {profile}")
+            print(f"Execute 'okta-saml -o {okta_profile} -p {profile}")
             sys.exit(0)
         else:
             sys.exit(0)
@@ -181,6 +181,6 @@ class OktaAuthConfig():
     @staticmethod
     def get_okta_profiles():
         value = RawConfigParser()
-        config_path = os.path.expanduser('~') + '/.okta-radius'
+        config_path = os.path.expanduser('~') + '/.okta-saml'
         value.read(config_path)
         return value.sections()
