@@ -65,17 +65,3 @@ Optional flags:
 - `--config` Add/Create new Okta profile configuration.
 - `--version` or `-V` Outputs version number then exits.
 
-## Run from docker container
-This process is taken from gimme-aws-creds and adapted
-
-### Build the image 
-```
-docker build -t okta-radiuscli .
-
-```
-### Run the image with the command
-
-```
-docker run -it --rm -v ~/.radius/credentials:/root/.radius/credentials -v ~/.okta-radiuscli:/root/.okta-radius --profile default okta-radiuscli
-```
-
