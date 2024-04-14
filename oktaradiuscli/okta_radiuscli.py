@@ -105,13 +105,6 @@ def main(okta_profile, profile, verbose, version,
         print(__version__)
         sys.exit(0)
 
-    # For testing
-    debug = True
-    verbose = True
-    force = False
-    profile = "default"
-    okta_profile = "radius.test"
-
     # Set up logging
     logger = logging.getLogger('okta-radiuscli')
     logger.setLevel(logging.DEBUG)
