@@ -2,7 +2,6 @@
 # pylint: disable=C0325
 # Copyright 2024 Michael OShea
 import os
-import sys
 import base64
 import xml.etree.ElementTree as ET
 from collections import namedtuple

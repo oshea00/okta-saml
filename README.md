@@ -15,9 +15,6 @@ Associate your users/groups in the authserver access policies as-needed - one of
 ## Disclaimer
 Okta is a registered trademark of Okta, Inc. and this tool has no affiliation with or sponsorship by Okta, Inc.
 
-## Python Support
-This project is written for Python 3. Running it with Python 2 may work, but it is not supported. Since Python 2 is end-of-life (as of 2020-JAN-01), feature requests and PRs to add Python 2 support will likely not be accepted, outside of extreme circumstances.
-
 ## Installation
 - `> python3 -m pip install . --upgrade`
 - Execute `okta-saml --config` and follow the steps to configure your Okta profile OR
@@ -45,8 +42,6 @@ password = <your_okta_password> # Only save your password if you know what you a
 ### Example
 
 `okta-saml --profile default`
-
-If no awscli commands are provided, then okta-saml will simply output STS credentials to your credentials file, or console, depending on how `--profile` is set.
 
 Optional flags:
 - `--profile` or `-p` Sets your temporary credentials to a profile in `.saml/credentials`. If omitted and not configured in `~/.okta-saml`, credentials will output to console.

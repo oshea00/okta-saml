@@ -1,8 +1,7 @@
 """ Handles auth to Okta and returns SAML assertion """
+# Copyright 2024 Michael OShea
 # pylint: disable=C0325,R0912,C1801
-# Incorporates flow auth code taken from https://github.com/Nike-Inc/gimme-aws-creds
 import sys
-import re
 from codecs import decode
 import requests
 from bs4 import BeautifulSoup as bs
