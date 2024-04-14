@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "okta-saml"
 authors = [
-    {name="Mike Oshea",email="moshea@paraport.com"}
+    {name="Mike Oshea",email="oshea00@gmail.com"}
 ]
 description = "Utility to obtain saml api jwt from OKTA"
 readme = "README.md"
