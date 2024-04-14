@@ -1,0 +1,11 @@
+**/*.pyc
+**/.DS_Store
+dist
+*.egg-info
+.idea/*
+tests/*
+.vscode/*
+.venv/*
+build
+Pipfile
+Pipfile.lock
