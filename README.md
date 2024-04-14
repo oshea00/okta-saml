@@ -26,6 +26,7 @@ password = <your_okta_password> # Only save your password if you know what you a
 profile  = <radius_profile_to_store_credentials> # Sets your temporary credentials to a profile in `.radius/credentials`. Overridden by `--profile` command line flag
 app-link = <app_link_from_okta> # Found in Okta's configuration for your AWS account.
 duration = 3600 # duration in seconds to request a session token for. default: 3600
+scope = scope to use for API auth server
 ```
 
 ## Supported Features
