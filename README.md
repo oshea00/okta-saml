@@ -37,7 +37,7 @@ password = <your_okta_password> # Only save your password if you know what you a
 `okta-saml --profile <saml_profile>`
 - Subsequent executions will first check if the credentials are still valid and skip Okta authentication if so.
 - Multiple Okta profiles are supported, but if none are specified, then `default` will be used.
-- Selections for saml api and saml scope are saved to the `~/.okta-saml` file. 
+- Selections for saml api are saved to the `~/.okta-saml` file. 
 
 ### Example
 
