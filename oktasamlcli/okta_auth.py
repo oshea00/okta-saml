@@ -8,11 +8,10 @@ from bs4 import BeautifulSoup as bs
 
 class OktaAuth():
     """ Handles auth to Okta and returns SAML assertion """
-    def __init__(self, okta_profile, verbose, logger, totp_token,
+    def __init__(self, okta_profile, verbose, logger,
         okta_auth_config, username, password, verify_ssl=True):
 
         self.okta_profile = okta_profile
-        self.totp_token = totp_token
         self.logger = logger
         self.verbose = verbose
         self.verify_ssl = verify_ssl

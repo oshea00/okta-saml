@@ -53,12 +53,12 @@ def get_jwt_token(client_id, client_secret, token_url, scope):
     return jwt_decoded
 
 def get_credentials(saml_auth, okta_profile, profile,
-                    verbose, logger, totp_token,  
+                    verbose, logger,   
                     okta_username=None, okta_password=None):
     """ Gets credentials from Okta """
 
     okta_auth_config = OktaAuthConfig(logger)
-    okta = OktaAuth(okta_profile, verbose, logger, totp_token, 
+    okta = OktaAuth(okta_profile, verbose, logger, 
         okta_auth_config, okta_username, okta_password)
 
     _, assertion = okta.get_assertion()
@@ -92,14 +92,13 @@ If none is provided, then the default profile will be used.\n")
 @click.option('-p', '--profile', help="Name of the profile to store temporary \
 credentials in ~/.saml/credentials. If profile doesn't exist, it will be \
 created. If omitted, credentials will output to console.\n")
-@click.option('-t', '--token', help='TOTP token from your authenticator app')
 @click.option('-U', '--username', 'okta_username', help="Okta username")
 @click.option('-P', '--password', 'okta_password', help="Okta password")
 @click.option('--config', is_flag=True, help="Okta config initialization/addition")
 @click.option('-s', '--switch', is_flag=True, default=False, is_eager=True, help="Switch to another okta profile and refresh the token")
 def main(okta_profile, profile, verbose, version,
          debug, force, 
-         token, okta_username, okta_password, config, switch):
+         okta_username, okta_password, config, switch):
     """ Authenticate to saml using Okta """
     if version:
         print(__version__)
@@ -133,7 +132,7 @@ def main(okta_profile, profile, verbose, version,
             logger.info("Force option selected, \
                 getting new credentials anyway.")
         get_credentials(
-            saml_auth, okta_profile, profile, verbose, logger, token, okta_username, okta_password
+            saml_auth, okta_profile, profile, verbose, logger, okta_username, okta_password
         )
 
 if __name__ == "__main__":
