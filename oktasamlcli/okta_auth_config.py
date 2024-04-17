@@ -36,14 +36,17 @@ class OktaAuthConfig():
             profile = input('Enter credentials profile name: ')
             base_url = input('Enter Okta base url [your main organisation Okta url]: ')
             username = input('Enter Okta username: ')
-            app_link = input('Enter OKTA SAML App app-link [optional]: ')
+            app_link = input('Enter OKTA SAML App app-link: ')
+            issuer_url = input('Enter issuer-url: ')
+            scope = input('Enter scope: ')
 
             value.add_section(okta_profile)
             value.set(okta_profile, 'base-url', base_url)
             value.set(okta_profile, 'profile', profile)
             value.set(okta_profile, 'username', username)
-            if app_link:
-                value.set(okta_profile, 'app-link', app_link)
+            value.set(okta_profile, 'issuer', issuer_url)
+            value.set(okta_profile, 'scope', scope)
+            value.set(okta_profile, 'app-link', app_link)
 
             with open(config_path, 'w') as configfile:
                 value.write(configfile)
@@ -65,10 +68,7 @@ class OktaAuthConfig():
                 "Using base-url from default profile %s" % base_url
             )
         else:
-            self.logger.error(
-                "No profile found. Please define a default profile, or specify a named profile using `--okta-profile`"
-            )
-            sys.exit(1)
+            base_url = input('Enter base-url: ')
         return base_url
 
     def app_link_for(self, okta_profile):
@@ -78,6 +78,8 @@ class OktaAuthConfig():
             app_link = self._value.get(okta_profile, 'app-link')
         elif self._value.has_option('default', 'app-link'):
             app_link = self._value.get('default', 'app-link')
+        else:
+            app_link = input('Enter app-link: ')
 
         if app_link:
             try:
@@ -88,9 +90,6 @@ class OktaAuthConfig():
                 self.logger.error("Malformed string in app link URL. Ensure there are no invalid characters.")
             self.logger.info("App Link set as: %s" % app_link)
             return app_link
-        else:
-            self.logger.error("The app-link is missing. Will try to retrieve it from Okta")
-            return None
         
     def issuer_url_for(self, okta_profile):
         """ Gets app_link from config """
@@ -99,6 +98,8 @@ class OktaAuthConfig():
             issuer_url = self._value.get(okta_profile, 'issuer')
         elif self._value.has_option('default', 'issuer'):
             issuer_url = self._value.get('default', 'issuer')
+        else:
+            issuer_url = input('Enter issuer-url: ')
 
         if issuer_url:
             try:
@@ -109,23 +110,19 @@ class OktaAuthConfig():
                 self.logger.error("Malformed string in issuer URL. Ensure there are no invalid characters.")
             self.logger.info("Issuer url set as: %s" % issuer_url)
             return issuer_url
-        else:
-            self.logger.error("The issuer is missing.")
-            sys.exit(-1)
         
     def scope_for(self, okta_profile):
         """ Gets scope from config """
         scope = None
         if self._value.has_option(okta_profile, 'scope'):
-            app_link = self._value.get(okta_profile, 'scope')
+            scope = self._value.get(okta_profile, 'scope')
             self.logger.info("Scope set as: %s" % scope)
         elif self._value.has_option('default', 'scope'):
-            app_link = self._value.get('default', 'scope')
+            scope = self._value.get('default', 'scope')
             self.logger.info("Scope set as: %s" % scope)
         else:
-            self.logger.error("Scope is missing.")
-            sys.exit(-1)
-        return app_link
+            scope = input('Enter scope(s): ')
+        return scope
 
 
     def username_for(self, okta_profile):
@@ -149,40 +146,6 @@ class OktaAuthConfig():
         else:
             password = getpass('Enter password: ')
         return password
-
-    def factor_for(self, okta_profile):
-        """ Gets factor from config """
-        if self._value.has_option(okta_profile, 'factor'):
-            factor = self._value.get(okta_profile, 'factor')
-            self.logger.debug("Setting MFA factor to %s" % factor)
-            return factor
-        elif self._value.has_option('default', 'factor'):
-            factor = self._value.get('default', 'factor')
-            self.logger.debug("Setting MFA factor to %s from default" % factor)
-            return factor
-        return None
-
-    def scope_for(self, okta_profile):
-        """ Gets scope from config """
-        if self._value.has_option(okta_profile, 'scope'):
-            scope = self._value.get(okta_profile, 'scope')
-            return scope
-        elif self._value.has_option('default', 'scope'):
-            scope = self._value.get('default', 'scope')
-            return scope
-        return None
-
-    def write_applink_to_profile(self, okta_profile, app_link):
-        """ Saves app link to profile in config """
-        if not self._value.has_section(okta_profile):
-            self._value.add_section(okta_profile)
-
-        base_url = self.base_url_for(okta_profile)
-        self._value.set(okta_profile, 'base-url', base_url)
-        self._value.set(okta_profile, 'app-link', app_link)
-
-        with open(self.config_path, 'w+') as configfile:
-            self._value.write(configfile)
 
     @staticmethod
     def get_okta_profiles():

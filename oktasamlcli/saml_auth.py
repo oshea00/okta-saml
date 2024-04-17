@@ -105,7 +105,7 @@ class SamlAuth():
             SamlAuth.set_default_profile(self, config)
 
     def extract_clientid_from(self, assertion):
-        attribute = 'client_id'
+        attribute = 'ClientID'
         attribute_value_urn = '{urn:oasis:names:tc:SAML:2.0:assertion}AttributeValue'
         root = ET.fromstring(base64.b64decode(assertion))
         for saml2attribute in root.iter('{urn:oasis:names:tc:SAML:2.0:assertion}Attribute'):
@@ -115,7 +115,7 @@ class SamlAuth():
         return None
 
     def extract_clientsecret_from(self, assertion):
-        attribute = 'client_secret'
+        attribute = 'ClientSecret'
         attribute_value_urn = '{urn:oasis:names:tc:SAML:2.0:assertion}AttributeValue'
         root = ET.fromstring(base64.b64decode(assertion))
         for saml2attribute in root.iter('{urn:oasis:names:tc:SAML:2.0:assertion}Attribute'):

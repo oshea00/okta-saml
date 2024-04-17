@@ -16,7 +16,6 @@ class OktaAuth():
         self.logger = logger
         self.verbose = verbose
         self.verify_ssl = verify_ssl
-        self.factor = okta_auth_config.factor_for(okta_profile)
         self.app_link = okta_auth_config.app_link_for(okta_profile)
         self.okta_auth_config = okta_auth_config
         self.session = None
