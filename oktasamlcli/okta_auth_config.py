@@ -91,6 +91,41 @@ class OktaAuthConfig():
         else:
             self.logger.error("The app-link is missing. Will try to retrieve it from Okta")
             return None
+        
+    def issuer_url_for(self, okta_profile):
+        """ Gets app_link from config """
+        issuer_url = None
+        if self._value.has_option(okta_profile, 'issuer'):
+            issuer_url = self._value.get(okta_profile, 'issuer')
+        elif self._value.has_option('default', 'issuer'):
+            issuer_url = self._value.get('default', 'issuer')
+
+        if issuer_url:
+            try:
+                if not validators.url(issuer_url):
+                    self.logger.error("The issuer url provided: %s is an invalid url" % issuer_url)
+                    sys.exit(-1)
+            except TypeError as ex:
+                self.logger.error("Malformed string in issuer URL. Ensure there are no invalid characters.")
+            self.logger.info("Issuer url set as: %s" % issuer_url)
+            return issuer_url
+        else:
+            self.logger.error("The issuer is missing.")
+            sys.exit(-1)
+        
+    def scope_for(self, okta_profile):
+        """ Gets scope from config """
+        scope = None
+        if self._value.has_option(okta_profile, 'scope'):
+            app_link = self._value.get(okta_profile, 'scope')
+            self.logger.info("Scope set as: %s" % scope)
+        elif self._value.has_option('default', 'scope'):
+            app_link = self._value.get('default', 'scope')
+            self.logger.info("Scope set as: %s" % scope)
+        else:
+            self.logger.error("Scope is missing.")
+            sys.exit(-1)
+        return app_link
 
 
     def username_for(self, okta_profile):

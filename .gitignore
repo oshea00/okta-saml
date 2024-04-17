@@ -9,3 +9,4 @@ tests/*
 build
 Pipfile
 Pipfile.lock
+env/*

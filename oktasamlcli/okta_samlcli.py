@@ -1,7 +1,6 @@
 """ Wrapper script for saml api which handles Okta auth """
 # pylint: disable=C0325,R0913,R0914
 # Copyright 2024 Michael OShea
-from email.policy import default
 import sys
 import logging
 import click
@@ -9,9 +8,6 @@ from oktasamlcli.version import __version__
 from oktasamlcli.okta_auth import OktaAuth
 from oktasamlcli.okta_auth_config import OktaAuthConfig
 from oktasamlcli.saml_auth import SamlAuth
-import requests
-from requests.auth import HTTPBasicAuth
-from urllib.parse import urlparse
 
 def okta_switch(logger):
     okta_profiles = sorted(OktaAuthConfig.get_okta_profiles())
@@ -26,32 +22,6 @@ def okta_switch(logger):
             
     return okta_profiles[okta_profile_selected]
 
-def get_server_url(full_url):
-    parsed_url = urlparse(full_url)
-    server_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
-    return server_url
-
-def get_jwt_token(client_id, client_secret, token_url, scope):
-
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded'
-    }
-
-    payload = {
-        "grant_type": "client_credentials",
-        "scope": scope
-    }
-
-    response = requests.post(token_url, auth=HTTPBasicAuth(client_id, client_secret), data=payload, headers=headers)
-
-    jwt_decoded = None
-
-    if response.status_code == 200:
-        jwt_json = response.json()
-        jwt_decoded = jwt_json['access_token']
-
-    return jwt_decoded
-
 def get_credentials(saml_auth, okta_profile, profile,
                     verbose, logger,   
                     okta_username=None, okta_password=None):
@@ -63,22 +33,17 @@ def get_credentials(saml_auth, okta_profile, profile,
 
     _, assertion = okta.get_assertion()
 
-    scope = saml_auth.extract_scope_from(assertion)
     client_id = saml_auth.extract_clientid_from(assertion)
     client_secret = saml_auth.extract_clientsecret_from(assertion)
-    app_link = okta_auth_config.app_link_for(okta_profile)
-    token_url = f'{get_server_url(app_link)}/oauth2/default/v1/token'
 
-    jwt_token = get_jwt_token(
+    okta.get_auth_code(client_id)
+
+    okta.get_jwt_token(
         client_id,
-        client_secret,
-        token_url,
-        scope
+        client_secret
     )
 
-    session_token = jwt_token
-
-    saml_auth.write_jwt_token(session_token)
+    saml_auth.write_jwt_token(okta.access_token)
 
 
 # pylint: disable=R0913
@@ -102,7 +67,7 @@ def main(okta_profile, profile, verbose, version,
     """ Authenticate to saml using Okta """
     if version:
         print(__version__)
-        sys.exit(0)
+        sys.exit(0)    
 
     # Set up logging
     logger = logging.getLogger('okta-saml')
