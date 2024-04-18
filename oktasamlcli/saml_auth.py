@@ -104,12 +104,6 @@ class SamlAuth():
         if self.profile != 'default':
             SamlAuth.set_default_profile(self, config)
 
-    def extract_scope_from(self, assertion):
-        assertion_xml = base64.b64decode(assertion)
-        root = ET.fromstring(assertion_xml)
-        audience = root.find('.//{urn:oasis:names:tc:SAML:2.0:assertion}Audience').text
-        return audience
-
     def extract_clientid_from(self, assertion):
         attribute = 'ClientID'
         attribute_value_urn = '{urn:oasis:names:tc:SAML:2.0:assertion}AttributeValue'
@@ -129,4 +123,3 @@ class SamlAuth():
                 for saml2attributevalue in saml2attribute.iter(attribute_value_urn):
                     return saml2attributevalue.text
         return None
-

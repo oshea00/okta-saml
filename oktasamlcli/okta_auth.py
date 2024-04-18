@@ -5,6 +5,7 @@ import sys
 from codecs import decode
 import requests
 from bs4 import BeautifulSoup as bs
+from requests.auth import HTTPBasicAuth
 
 class OktaAuth():
     """ Handles auth to Okta and returns SAML assertion """
@@ -15,7 +16,6 @@ class OktaAuth():
         self.logger = logger
         self.verbose = verbose
         self.verify_ssl = verify_ssl
-        self.factor = okta_auth_config.factor_for(okta_profile)
         self.app_link = okta_auth_config.app_link_for(okta_profile)
         self.okta_auth_config = okta_auth_config
         self.session = None
@@ -23,6 +23,10 @@ class OktaAuth():
         self.session_id = ""
         self.https_base_url = "https://%s" % okta_auth_config.base_url_for(okta_profile)
         self.auth_url = "%s/api/v1/authn" % self.https_base_url
+        self.scope = okta_auth_config.scope_for(okta_profile)
+        self.issuer_url = okta_auth_config.issuer_url_for(okta_profile)
+        self.authorization_code = ""
+        self.access_token = ""
 
         if username:
             self.username = username
@@ -98,3 +102,45 @@ Please contact you administrator in order to unlock the account!""")
         resp = self.session.get(self.app_link)
         assertion = self.get_saml_assertion(resp)
         return app_name, assertion
+    
+    def get_auth_code(self, client_id):
+        """ Main method to get authorization code from Okta """
+        payload = {
+            'client_id' : client_id,
+            'response_type' : 'code',
+            'response_mode' : 'form_post',
+            'scope' : self.scope,
+            'redirect_uri' : 'http://localhost:8080/authorization-code/callback', #Dummy URI
+            'state' : 'none'
+        }
+        resp = self.session.get(f'{self.issuer_url}/v1/authorize', params=payload)
+        soup = bs(resp.content, 'html.parser')
+        try:
+            self.authorization_code = soup.find_all(attrs={"name": "code"})[0]['value']
+        except:
+            self.logger.error('Unable to retrieve authorization code. Verify Okta config.')
+            sys.exit(-1)
+    
+    def get_jwt_token(self, client_id, client_secret):
+
+        headers =  {
+            'Accept' : 'application/json',
+            'Content-Type' : 'application/x-www-form-urlencoded'
+            }
+
+        payload = {
+            'grant_type' : 'authorization_code',
+            'redirect_uri' : 'http://localhost:8080/authorization-code/callback', #Dummy URI
+            'code' : self.authorization_code,
+            'scope' : self.scope
+        }
+
+        response = requests.post(f'{self.issuer_url}/v1/token', auth=HTTPBasicAuth(client_id, client_secret), data=payload, headers=headers)
+
+        jwt_decoded = None
+
+        if response.status_code == 200:
+            jwt_json = response.json()
+            jwt_decoded = jwt_json['access_token']
+
+        self.access_token = jwt_decoded
