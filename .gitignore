@@ -10,3 +10,4 @@ build
 Pipfile
 Pipfile.lock
 env/*
+dist/
