@@ -1,8 +1,9 @@
-requests==2.27.1
-click==7.0
-beautifulsoup4==4.11.1
-ConfigParser==3.5.0
-validators==0.11.2
-setuptools
-build
+# This file is maintained for backwards compatibility.
+# The project now uses uv for dependency management.
+# See pyproject.toml for the canonical dependency list.
+
+requests>=2.32.3
+click>=8.0
+beautifulsoup4>=4.12.0
+validators>=0.22.0
 
