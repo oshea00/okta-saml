@@ -24,4 +24,5 @@ okta-saml = "oktasamlcli.okta_samlcli:main"
 [tool.uv]
 dev-dependencies = [
     "build>=1.0.0",
+    "twine>=6.2.0",
 ]
