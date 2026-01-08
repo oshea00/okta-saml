@@ -27,13 +27,23 @@ The application follows this flow:
 
 ## Development Commands
 
+This project uses [uv](https://docs.astral.sh/uv/) for fast, reliable Python package management.
+
 ### Installation
 ```bash
-python3 -m pip install . --upgrade
+# Install dependencies and the package in development mode
+uv sync
+
+# Or install the package directly
+uv pip install .
 ```
 
 ### Running the CLI
 ```bash
+# Run with uv
+uv run okta-saml --profile <profile_name>
+
+# Or if installed globally
 okta-saml --profile <profile_name>
 ```
 
@@ -42,21 +52,35 @@ okta-saml --profile <profile_name>
 okta-saml --config  # Initialize new Okta profile configuration
 ```
 
+### Dependency Management
+```bash
+# Add a new dependency
+uv add <package-name>
+
+# Update dependencies
+uv lock --upgrade
+
+# Sync dependencies (install/update based on lockfile)
+uv sync
+```
+
 ## Dependencies
 
 This project uses:
 - **requests**: HTTP client for Okta API calls
 - **click**: CLI framework for command-line interface
 - **beautifulsoup4**: HTML/XML parsing for SAML responses
-- **ConfigParser**: Configuration file management
 - **validators**: Input validation
+- **configparser**: Configuration file management (Python built-in)
 
 ## Configuration Files
 
 - **~/.okta-saml**: Main configuration file containing Okta profiles with base-url, app-link, username, etc.
 - **~/.saml/credentials**: Stored JWT credentials organized by profile
-- **pyproject.toml**: Python packaging configuration using setuptools
-- **requirements.txt**: Python dependencies
+- **pyproject.toml**: Python packaging configuration using setuptools and uv
+- **uv.lock**: Dependency lockfile for reproducible installations
+- **.python-version**: Specifies Python 3.11+ requirement
+- **requirements.txt**: Legacy dependency list (maintained for backwards compatibility)
 
 ## Key Classes and Methods
 

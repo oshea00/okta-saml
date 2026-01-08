@@ -1,22 +1,27 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "okta-saml"
 authors = [
-    {name="Mike Oshea",email="oshea00@gmail.com"}
+    {name="Mike Oshea", email="oshea00@gmail.com"}
 ]
 description = "Utility to obtain saml api jwt from OKTA"
 readme = "README.md"
-requires-python = ">=3.8"
-version = "0.0.1"
+requires-python = ">=3.11"
+version = "0.0.2"
 dependencies = [
-  "requests==2.27.1",
-  "click==7.0",
-  "beautifulsoup4==4.11.1",
-  "ConfigParser==3.5.0",
-  "validators==0.11.2",
+    "requests>=2.32.3",
+    "click>=8.0",
+    "beautifulsoup4>=4.12.0",
+    "validators>=0.22.0",
 ]
+
 [project.scripts]
 okta-saml = "oktasamlcli.okta_samlcli:main"
+
+[tool.uv]
+dev-dependencies = [
+    "build>=1.0.0",
+]
